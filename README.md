@@ -8,6 +8,7 @@ HackerRank, and real-world case studies while prepping for placements.
 | Day | Topics | Problems | File |
 |-----|--------|----------|------|
 | 1 | SELECT / WHERE / ORDER BY · JOINS | Not Boring Movies · Average Selling Price | [day1.md](./day1.md) |
+| 2 | Window functions (NTILE, running total) · Self-join · GROUP BY | Performance Bucketing · Employees Outperforming Managers · Monthly Deposit Running Total | [day2.md](./day2.md) |
 
 Each day's file contains, per problem: the question, the final SQL solution, and
 my notes (what I got wrong first / key takeaway).

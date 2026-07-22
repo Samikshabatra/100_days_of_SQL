@@ -121,3 +121,56 @@ ORDER BY percentage DESC, contest_id ASC;
   dividing by 3 total users gives the percentage.
 - The tie between 208 and 209 (both 100.00) is resolved by `contest_id ASC`, which
   is exactly why the `ORDER BY` has a second key.
+
+---
+
+## Problem 3 — Queries Quality and Percentage (LeetCode 1211)
+
+**Topic:** `AVG()` of a ratio · conditional aggregation (`AVG(condition)`) · **Difficulty:** Easy
+
+### Table: Queries
+
+| Column     | Type    |
+|------------|---------|
+| query_name | VARCHAR |
+| result     | VARCHAR |
+| position   | INT     |
+| rating     | INT     |
+
+`position` ranges 1–500, `rating` ranges 1–5. A query with `rating < 3` is a
+**poor** query. The table may contain duplicate rows.
+
+### Task
+
+For each `query_name` compute:
+- **quality** — the average of `rating / position` across its rows.
+- **poor_query_percentage** — the percentage of its rows with `rating < 3`.
+
+Both rounded to 2 decimals. Any order.
+
+### Solution
+
+```sql
+SELECT query_name,
+       ROUND(AVG(rating / position), 2) AS quality,
+       ROUND(AVG(rating < 3) * 100, 2) AS poor_query_percentage
+FROM Queries
+GROUP BY query_name;
+```
+
+### Result
+
+| query_name | quality | poor_query_percentage |
+|------------|---------|-----------------------|
+| Dog        | 2.50    | 33.33                 |
+| Cat        | 0.66    | 33.33                 |
+
+### Notes
+
+- **quality:** `AVG(rating / position)` — the ratio is computed *per row* first,
+  then averaged. For Dog: `((5/1) + (5/2) + (1/200)) / 3 = 2.50`.
+- **poor_query_percentage:** the neat trick is `AVG(rating < 3)`. In MySQL a
+  boolean is `1`/`0`, so averaging the condition gives the *fraction* of poor
+  rows; `* 100` turns it into a percentage. Dog has 1 poor row of 3 → `33.33`.
+- `AVG(rating < 3) * 100` is shorter than the classic
+  `SUM(rating < 3) * 100.0 / COUNT(*)` and does the same thing.

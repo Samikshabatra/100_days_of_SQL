@@ -58,3 +58,62 @@ GROUP BY DATE_FORMAT(trans_date, '%Y-%m'), country;
   - **Boolean SUM** → `SUM(state = 'approved')`. In MySQL the condition is `1`/`0`,
     so summing it *counts* the approved rows — shorter than `COUNT(CASE WHEN ...)`.
 - `COUNT(*)` / `SUM(amount)` cover **all** rows in the group (approved + declined).
+
+---
+
+## Problem 2 — Immediate Food Delivery II (LeetCode 1174)
+
+**Topic:** first-order filtering via `MIN()` subquery · conditional percentage · `JOIN` on two keys · **Difficulty:** Medium
+
+### Table: Delivery
+
+| Column                     | Type |
+|----------------------------|------|
+| delivery_id                | INT  |
+| customer_id                | INT  |
+| order_date                 | DATE |
+| customer_pref_delivery_date| DATE |
+
+`delivery_id` is the primary key. An order is **immediate** if
+`order_date = customer_pref_delivery_date`, else **scheduled**. A customer's
+**first order** is their earliest `order_date` (exactly one per customer).
+
+### Task
+
+Find the percentage of **immediate** orders among the **first orders** of all
+customers, rounded to 2 decimals.
+
+### Solution
+
+```sql
+SELECT ROUND(
+         SUM(CASE WHEN d.order_date = d.customer_pref_delivery_date THEN 1 ELSE 0 END)
+         * 100.0 / COUNT(*), 2
+       ) AS immediate_percentage
+FROM Delivery d
+JOIN (
+    SELECT customer_id, MIN(order_date) AS first_order
+    FROM Delivery
+    GROUP BY customer_id
+) f
+  ON d.customer_id = f.customer_id
+ AND d.order_date  = f.first_order;
+```
+
+### Result
+
+| immediate_percentage |
+|----------------------|
+| 33.33                |
+
+### Notes
+
+- The subquery `f` finds each customer's **first order** (`MIN(order_date)`); the
+  `JOIN ... ON d.customer_id = f.customer_id AND d.order_date = f.first_order`
+  keeps only those first-order rows.
+- Then over just those rows: `SUM(CASE WHEN order_date = pref_date THEN 1 ELSE 0 END)`
+  counts the immediate ones, `/ COUNT(*)` turns it into a fraction, `* 100.0`
+  (float, to avoid integer truncation) makes it a percentage.
+- In the example, only customer 2's first order is immediate → `1 / 3 = 33.33`.
+- Joining on the **date** as well as the customer is what restricts the average to
+  first orders — without it you'd be averaging over every delivery.

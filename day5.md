@@ -62,3 +62,49 @@ JOIN Activity a
 - In the example only player 1 returned the next day → `1 / 3 = 0.33`.
 - `DATE_ADD(date, INTERVAL 1 DAY)` is the clean way to express "the next calendar
   day" — no manual string math.
+
+---
+
+## Problem 2 — Number of Unique Subjects Taught by Each Teacher (LeetCode 2356)
+
+**Topic:** `COUNT(DISTINCT ...)` · `GROUP BY` · **Difficulty:** Easy
+
+### Table: Teacher
+
+| Column     | Type |
+|------------|------|
+| teacher_id | INT  |
+| subject_id | INT  |
+| dept_id    | INT  |
+
+`(subject_id, dept_id)` is the primary key. Each row means the teacher teaches a
+subject in a department — so the same subject can repeat across departments.
+
+### Task
+
+Calculate the number of **unique subjects** each teacher teaches. Return
+`| teacher_id | cnt |` in any order.
+
+### Solution
+
+```sql
+SELECT teacher_id, COUNT(DISTINCT subject_id) AS cnt
+FROM Teacher
+GROUP BY teacher_id;
+```
+
+### Result
+
+| teacher_id | cnt |
+|------------|-----|
+| 1          | 2   |
+| 2          | 4   |
+
+### Notes
+
+- The whole problem is the **`DISTINCT` inside `COUNT`**: a teacher can teach the
+  same subject in two departments (two rows), but that's still **one** unique
+  subject.
+- Teacher 1 has subject 2 (in depts 3 and 4) plus subject 3 → `COUNT(DISTINCT ...) = 2`.
+- Plain `COUNT(subject_id)` would wrongly count 3 for teacher 1 — the duplicate
+  subject-2 rows would both be counted.

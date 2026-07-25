@@ -108,3 +108,54 @@ GROUP BY teacher_id;
 - Teacher 1 has subject 2 (in depts 3 and 4) plus subject 3 → `COUNT(DISTINCT ...) = 2`.
 - Plain `COUNT(subject_id)` would wrongly count 3 for teacher 1 — the duplicate
   subject-2 rows would both be counted.
+
+---
+
+## Problem 3 — User Activity for the Past 30 Days I (LeetCode 1141)
+
+**Topic:** date-range `BETWEEN` filter · daily active users via `COUNT(DISTINCT)` · **Difficulty:** Easy
+
+### Table: Activity
+
+| Column        | Type |
+|---------------|------|
+| user_id       | INT  |
+| session_id    | INT  |
+| activity_date | DATE |
+| activity_type | ENUM |
+
+May have duplicate rows. `activity_type` is one of
+`open_session` / `end_session` / `scroll_down` / `send_message`.
+
+### Task
+
+Find the **daily active user count** for the 30-day period **ending 2019-07-27**
+(inclusive). A user is active on a day if they made at least one activity that day.
+Return `| day | active_users |` in any order.
+
+### Solution
+
+```sql
+SELECT activity_date AS day, COUNT(DISTINCT user_id) AS active_users
+FROM Activity
+WHERE activity_date BETWEEN '2019-06-28' AND '2019-07-27'
+GROUP BY activity_date;
+```
+
+### Result
+
+| day        | active_users |
+|------------|--------------|
+| 2019-07-20 | 2            |
+| 2019-07-21 | 2            |
+
+### Notes
+
+- The 30-day window ending **2019-07-27** inclusive starts at **2019-06-28**
+  (27 − 30 + 1). `BETWEEN` is inclusive on both ends, which is exactly what's
+  needed.
+- `COUNT(DISTINCT user_id)` is essential — the table has multiple rows per user
+  per day (open/scroll/end), but each user counts **once** toward that day's
+  active count.
+- Rows outside the window (e.g. 2019-06-25) are dropped by the `WHERE`, so they
+  never reach the group.

@@ -1,0 +1,60 @@
+# Day 6 — First-Year Filtering, HAVING & Per-Group Counts
+
+Three problems from LeetCode's Top SQL 50 — one Medium, two Easy.
+
+---
+
+## Problem 1 — Product Sales Analysis III (LeetCode 1070)
+
+**Topic:** per-group `MIN()` subquery · join back on group key + value · **Difficulty:** Medium
+
+### Table: Sales
+
+| Column     | Type |
+|------------|------|
+| sale_id    | INT  |
+| product_id | INT  |
+| year       | INT  |
+| quantity   | INT  |
+| price      | INT  |
+
+`(sale_id, year)` is the primary key. A product may have multiple sales entries in
+the same year. `price` is per-unit.
+
+### Task
+
+Find all sales that happened in the **first year** each product was sold. For each
+`product_id`, identify its earliest `year`, then return **all** sales entries for
+that product in that year. Return `| product_id | first_year | quantity | price |`
+in any order.
+
+### Solution
+
+```sql
+SELECT s.product_id, s.year AS first_year, s.quantity, s.price
+FROM Sales s
+JOIN (
+    SELECT product_id, MIN(year) AS first_year
+    FROM Sales
+    GROUP BY product_id
+) t
+  ON s.product_id = t.product_id
+ AND s.year = t.first_year;
+```
+
+### Result
+
+| product_id | first_year | quantity | price |
+|------------|------------|----------|-------|
+| 100        | 2008       | 10       | 5000  |
+| 200        | 2011       | 15       | 9000  |
+
+### Notes
+
+- The subquery `t` gets each product's **earliest** year (`MIN(year)`).
+- Joining on **both** `product_id` **and** `year = first_year` keeps every original
+  row from that first year — so if a product had two sales in its first year, both
+  come back (the task says return *all* entries).
+- You can't just `SELECT ... MIN(year), quantity` in one grouped query —
+  `quantity`/`price` aren't functionally tied to `MIN(year)`. The self-join back to
+  `Sales` is what recovers the real rows.

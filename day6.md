@@ -58,3 +58,46 @@ JOIN (
 - You can't just `SELECT ... MIN(year), quantity` in one grouped query —
   `quantity`/`price` aren't functionally tied to `MIN(year)`. The self-join back to
   `Sales` is what recovers the real rows.
+
+---
+
+## Problem 2 — Classes With at Least 5 Students (LeetCode 596)
+
+**Topic:** `GROUP BY` + `HAVING` on an aggregate · **Difficulty:** Easy
+
+### Table: Courses
+
+| Column  | Type    |
+|---------|---------|
+| student | VARCHAR |
+| class   | VARCHAR |
+
+`(student, class)` is the primary key — each row is a student enrolled in a class.
+
+### Task
+
+Find all classes that have **at least 5 students**. Return `| class |` in any order.
+
+### Solution
+
+```sql
+SELECT class
+FROM Courses
+GROUP BY class
+HAVING COUNT(student) >= 5;
+```
+
+### Result
+
+| class |
+|-------|
+| Math  |
+
+### Notes
+
+- `HAVING` filters **after** grouping — it's the aggregate counterpart of `WHERE`.
+  You can't use `WHERE COUNT(student) >= 5` because `WHERE` runs before the rows are
+  grouped and aggregates don't exist yet.
+- The primary key `(student, class)` guarantees no duplicate student-in-class rows,
+  so `COUNT(student)` is a clean head-count per class.
+- In the example only `Math` has ≥ 5 distinct students.

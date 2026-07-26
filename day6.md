@@ -101,3 +101,50 @@ HAVING COUNT(student) >= 5;
 - The primary key `(student, class)` guarantees no duplicate student-in-class rows,
   so `COUNT(student)` is a clean head-count per class.
 - In the example only `Math` has ≥ 5 distinct students.
+
+---
+
+## Problem 3 — Find Followers Count (LeetCode 1729)
+
+**Topic:** `COUNT()` per group · `GROUP BY` + `ORDER BY` · **Difficulty:** Easy
+
+### Table: Followers
+
+| Column      | Type |
+|-------------|------|
+| user_id     | INT  |
+| follower_id | INT  |
+
+`(user_id, follower_id)` is the primary key. Each row means `follower_id` follows
+`user_id`.
+
+### Task
+
+For each user, return the number of followers. Return `| user_id | followers_count |`
+ordered by `user_id` ascending.
+
+### Solution
+
+```sql
+SELECT user_id, COUNT(follower_id) AS followers_count
+FROM Followers
+GROUP BY user_id
+ORDER BY user_id;
+```
+
+### Result
+
+| user_id | followers_count |
+|---------|-----------------|
+| 0       | 1               |
+| 1       | 1               |
+| 2       | 2               |
+
+### Notes
+
+- Straight `GROUP BY user_id` with `COUNT(follower_id)` — each group is one user,
+  and the count is how many rows (followers) they have.
+- No `DISTINCT` needed: the primary key `(user_id, follower_id)` already forbids the
+  same follower appearing twice for a user.
+- `ORDER BY user_id` is required by the prompt (ascending) — grouping alone doesn't
+  guarantee sorted output.

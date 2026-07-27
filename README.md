@@ -13,6 +13,7 @@ HackerRank, and real-world case studies while prepping for placements.
 | 4 | DATE_FORMAT bucketing · Conditional aggregation · First-order MIN subquery | Monthly Transactions I · Immediate Food Delivery II | [day4.md](./day4.md) |
 | 5 | Day-after retention (DATE_ADD self-join) · COUNT(DISTINCT) · Date-window BETWEEN | Game Play Analysis IV · Number of Unique Subjects Taught by Each Teacher · User Activity for the Past 30 Days I | [day5.md](./day5.md) |
 | 6 | First-year MIN subquery · GROUP BY + HAVING · Per-group COUNT | Product Sales Analysis III · Classes With at Least 5 Students · Find Followers Count | [day6.md](./day6.md) |
+| 7 | HAVING COUNT filters · MAX for null-safety · Count-match subquery ("bought all") | Biggest Single Number · Customers Who Bought All Products | [day7.md](./day7.md) |
 
 Each day's file contains, per problem: the question, the final SQL solution, and
 my notes (what I got wrong first / key takeaway).

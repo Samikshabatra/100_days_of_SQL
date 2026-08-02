@@ -53,3 +53,60 @@ ORDER BY m.employee_id;
   avg 38.5, rounds to **39**.
 - Must group by both `m.employee_id` and `m.name` since both are non-aggregated in
   the `SELECT`.
+
+---
+
+## Problem 2 — Primary Department for Each Employee (LeetCode 1789)
+
+**Topic:** `OR` with a `HAVING COUNT = 1` subquery for the single-department case · **Difficulty:** Easy
+
+### Table: Employee
+
+| Column        | Type    |
+|---------------|---------|
+| employee_id   | INT     |
+| department_id | INT     |
+| primary_flag  | VARCHAR |
+
+`(employee_id, department_id)` is the primary key. `primary_flag` is `'Y'`/`'N'`.
+An employee in only one department has `primary_flag = 'N'`.
+
+### Task
+
+Report every employee with their **primary department**. Employees in multiple
+departments have exactly one `'Y'`; employees in a single department report that
+one department (even though its flag is `'N'`). Any order.
+
+### Solution
+
+```sql
+SELECT employee_id, department_id
+FROM Employee
+WHERE primary_flag = 'Y'
+   OR employee_id IN (
+        SELECT employee_id
+        FROM Employee
+        GROUP BY employee_id
+        HAVING COUNT(*) = 1
+   );
+```
+
+### Result
+
+| employee_id | department_id |
+|-------------|---------------|
+| 1           | 1             |
+| 2           | 1             |
+| 3           | 3             |
+| 4           | 3             |
+
+### Notes
+
+- Two cases, joined with `OR`:
+  1. `primary_flag = 'Y'` — the marked primary for multi-department employees.
+  2. `employee_id IN (... HAVING COUNT(*) = 1)` — employees who appear in exactly
+     one row, i.e. belong to a single department (whose flag is `'N'`).
+- The subquery finds the single-department employees by counting their rows per
+  `employee_id` and keeping those with exactly one.
+- Employee 1 has only dept 1 (flag N) so the subquery catches it; employees 2 and 4
+  are caught by their `'Y'` flag.

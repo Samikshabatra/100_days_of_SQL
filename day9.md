@@ -46,3 +46,49 @@ FROM Triangle;
 - `CASE WHEN ... THEN 'Yes' ELSE 'No' END` labels each row; no `GROUP BY` since it's
   a per-row computation.
 - `13, 15, 30` fails because `13 + 15 = 28 < 30`.
+
+---
+
+## Problem 2 — Consecutive Numbers (LeetCode 180)
+
+**Topic:** triple self-join on `id + 1` / `id + 2` · consecutive-run detection · **Difficulty:** Medium
+
+### Table: Logs
+
+| Column | Type    |
+|--------|---------|
+| id     | INT     |
+| num    | VARCHAR |
+
+`id` is the primary key, an autoincrement starting at 1 (so rows are contiguous).
+
+### Task
+
+Find all numbers that appear **at least three times consecutively**. Return
+`| ConsecutiveNums |`, any order.
+
+### Solution
+
+```sql
+SELECT DISTINCT l1.num AS ConsecutiveNums
+FROM Logs l1
+JOIN Logs l2 ON l2.id = l1.id + 1
+JOIN Logs l3 ON l3.id = l1.id + 2
+WHERE l1.num = l2.num
+  AND l2.num = l3.num;
+```
+
+### Result
+
+| ConsecutiveNums |
+|-----------------|
+| 1               |
+
+### Notes
+
+- Because `id` is contiguous, "consecutive rows" = `id`, `id+1`, `id+2`. Join the
+  table to itself three times, aligned to those offsets.
+- The `WHERE` forces all three aligned rows to share the same `num` — that's a run
+  of three in a row.
+- `DISTINCT` because a number appearing four+ times in a row would match from
+  multiple starting positions, producing duplicates.
